@@ -108,8 +108,6 @@
             max-width: 245px;
         }
 
-        
-
         #analyzeIcon {
             width: 200px;
             height: 150px;
@@ -179,6 +177,9 @@
 
         <!-- True image result -->
         <img id="trueImage" src="true.png" alt="True" />
+        
+        <!-- False image result -->
+        <img id="falseImage" src="false.png" alt="False" />
 
         <!-- Buttons - adjusted size and position -->
         <div id="buttons">
@@ -195,11 +196,15 @@
         const captureButton = document.getElementById('captureButton');
         const analysisSection = document.getElementById('analysisSection');
         const trueImage = document.getElementById('trueImage');
+        const falseImage = document.getElementById('falseImage');
         const reTakeButton = document.getElementById('reTakeButton');
         const backToHomeButton = document.getElementById('backToHomeButton');
         const canvas = document.getElementById('photoCanvas');
         const context = canvas.getContext('2d');
         let videoStream;
+        
+        // Add counter variable
+        let counter = 0;
 
         // Start button click handler
         document.getElementById('startButton').onclick = function() {
@@ -235,12 +240,26 @@
 
         // Capture button click handler
         captureButton.onclick = function() {
+            // Increment counter when capture button is clicked
+            counter++;
+            
             photoPage.style.display = 'none';
             analysisSection.style.display = 'flex';
             
             setTimeout(() => {
                 analysisSection.style.display = 'none';
-                trueImage.style.display = 'block';
+                
+                // Check if counter is even or odd
+                if (counter % 2 === 0) {
+                    // Even - show false image
+                    falseImage.style.display = 'block';
+                    trueImage.style.display = 'none';
+                } else {
+                    // Odd - show true image
+                    trueImage.style.display = 'block';
+                    falseImage.style.display = 'none';
+                }
+                
                 reTakeButton.style.display = 'inline-block';
             }, 5000);
         };
@@ -248,6 +267,7 @@
         // Retake button click handler
         reTakeButton.onclick = function() {
             trueImage.style.display = 'none';
+            falseImage.style.display = 'none';
             reTakeButton.style.display = 'none';
             photoPage.style.display = 'flex';
             startCamera();
@@ -263,10 +283,14 @@
             // Reset the UI
             photoPage.style.display = 'none';
             trueImage.style.display = 'none';
+            falseImage.style.display = 'none';
             reTakeButton.style.display = 'none';
             backToHomeButton.style.display = 'none';
             analysisSection.style.display = 'none';
             mainPage.style.display = 'flex';
+            
+            // Reset counter when returning to home
+            counter = 0;
         };
     </script>
 </body>
