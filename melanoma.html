@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Scanner</title>
+    <style>
+        /* Main page */
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background-image: url('xos-gel.png');
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+        }
+        
+        #startButton {
+            padding: 15px 30px;
+            font-size: 20px;
+            background-color: #ffffff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #startButton:hover {
+            background-color: #f0f0f0;
+        }
+
+        #logo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+
+        /* QR code scanning page */
+        .qr-page {
+            display: none;
+            background-image: url('page.png');
+            background-size: cover;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #qrCanvas {
+            width: 300px;
+            height: 300px;
+            border: 2px solid #ffffff;
+            margin-bottom: 20px;
+        }
+
+        #scanButton {
+            padding: 15px 30px;
+            font-size: 20px;
+            background-color: #ffffff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #scanButton:hover {
+            background-color: #f0f0f0;
+        }
+
+        #buttons {
+            margin-top: 20px;
+        }
+
+        .actionButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #ffffff;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .actionButton:hover {
+            background-color: #f0f0f0;
+        }
+
+        #qrResult {
+            font-size: 20px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <img id="logo" src="logo.png" alt="Logo">
+
+    <!-- Main Page -->
+    <div id="mainPage">
+        <button id="startButton">Start</button>
+    </div>
+
+    <!-- QR Code Page -->
+    <div class="qr-page" id="qrPage">
+        <canvas id="qrCanvas"></canvas>
+        <button id="scanButton">Scan QR Code</button>
+        <div id="qrResult"></div>
+        <div id="buttons">
+            <button class="actionButton" id="redrawButton">Redraw</button>
+            <button class="actionButton" id="returnButton">Return to Home Page</button>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/jsqr/dist/jsQR.js"></script>
+    <script>
+        // Show the QR code page after clicking start
+        document.getElementById('startButton').onclick = function() {
+            document.getElementById('mainPage').style.display = 'none';
+            document.getElementById('qrPage').style.display = 'flex';
+        };
+
+        // Set up the QR code scanning functionality
+        const canvas = document.getElementById('qrCanvas');
+        const context = canvas.getContext('2d');
+        const qrResult = document.getElementById('qrResult');
+        const scanButton = document.getElementById('scanButton');
+
+        let videoStream;
+
+        function startCamera() {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                .then((stream) => {
+                    videoStream = stream;
+                    const video = document.createElement('video');
+                    video.srcObject = videoStream;
+                    video.play();
+                    video.onloadedmetadata = () => {
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        scanQRCode(video);
+                    };
+                })
+                .catch((err) => {
+                    console.error('Error accessing camera: ', err);
+                });
+        }
+
+        function scanQRCode(video) {
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(imageData.data, canvas.width, canvas.height);
+            if (code) {
+                qrResult.textContent = 'QR Code Result: ' + code.data;
+                videoStream.getTracks().forEach(track => track.stop()); // Stop camera after reading QR code
+            } else {
+                requestAnimationFrame(() => scanQRCode(video)); // Continue scanning if no QR code detected
+            }
+        }
+
+        // Start scanning when the Scan QR Code button is clicked
+        scanButton.onclick = function() {
+            startCamera();
+        };
+
+        // Redraw button functionality (reset the QR code scan)
+        document.getElementById('redrawButton').onclick = function() {
+            qrResult.textContent = '';
+            startCamera();
+        };
+
+        // Return to the main page button functionality
+        document.getElementById('returnButton').onclick = function() {
+            document.getElementById('qrPage').style.display = 'none';
+            document.getElementById('mainPage').style.display = 'flex';
+        };
+    </script>
+
+</body>
+</html>
