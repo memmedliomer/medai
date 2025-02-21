@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code Scanner</title>
+    <title>Fotoğraf Çekme</title>
     <style>
         /* Main page */
         body {
@@ -12,23 +12,38 @@
             height: 100vh;
             background-image: url('xos-gel.png');
             background-size: cover;
+            font-family: Arial, sans-serif;
             display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            font-family: Arial, sans-serif;
+            height: 100vh;
+            width: 100%;
+            position: relative;
         }
-        
+
         #startButton {
             padding: 15px 30px;
             font-size: 20px;
-            background-color: #ffffff;
+            background-color: #28a745;
+            color: white;
             border: none;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s, transform 0.2s;
         }
 
         #startButton:hover {
-            background-color: #f0f0f0;
+            background-color: #218838;
+            transform: scale(1.05);
         }
 
         #logo {
@@ -37,98 +52,156 @@
             left: 20px;
         }
 
-        /* QR code scanning page */
-        .qr-page {
+        /* Photo page */
+        .photo-page {
             display: none;
-            background-image: url('page.png');
-            background-size: cover;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
+            width: 90%;
+            height: 45vh;
             justify-content: center;
             align-items: center;
-        }
-
-        #qrCanvas {
-            width: 300px;
-            height: 300px;
-            border: 2px solid #ffffff;
+            position: relative;
             margin-bottom: 20px;
         }
 
-        #scanButton {
+        #photoCanvas {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            max-width: 500px;
+            max-height: 80vh;
+            border: 2px solid #ccc;
+        }
+
+        /* Capture button */
+        #captureButton {
             padding: 15px 30px;
             font-size: 20px;
-            background-color: #ffffff;
+            background-color: #28a745;
+            color: white;
             border: none;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        #scanButton:hover {
-            background-color: #f0f0f0;
-        }
-
-        #buttons {
             margin-top: 20px;
+            position: absolute;
+            bottom: -70px;
+        }
+
+        #captureButton:hover {
+            background-color: #28a745;
+        }
+
+        /* Analysis display styles */
+        .analysis-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #114a8a;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            width: 80%;
+            max-width: 245px;
+        }
+
+        
+
+        #analyzeIcon {
+            width: 200px;
+            height: 150px;
+        }
+
+        /* True image display */
+        #trueImage {
+            display: none;
+            width: 200px;
+            height: auto;
+            margin: 20px 0;
+        }
+
+        /* Button container - adjusted position */
+        #buttons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            position: absolute;
+            bottom: 100px;
         }
 
         .actionButton {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #ffffff;
-            border: none;
-            cursor: pointer;
             margin: 10px;
+            padding: 12px 20px;
+            font-size: 16px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
             transition: background-color 0.3s;
+            width: 180px;
         }
 
         .actionButton:hover {
-            background-color: #f0f0f0;
-        }
-
-        #qrResult {
-            font-size: 20px;
-            margin-top: 20px;
+            background-color: #28a745;
         }
     </style>
 </head>
 <body>
+    <div class="container">
+        <!-- Main Page -->
+        <div id="mainPage">
+            <button id="startButton">Başla</button>
+        </div>
 
-    <img id="logo" src="logo.png" alt="Logo">
+        <!-- Photo Page -->
+        <div class="photo-page" id="photoPage">
+            <canvas id="photoCanvas"></canvas>
+            <button id="captureButton">Çek</button>
+        </div>
 
-    <!-- Main Page -->
-    <div id="mainPage">
-        <button id="startButton">Start</button>
-    </div>
+        <!-- Analysis Section - Redesigned to match image -->
+        <div id="analysisSection" class="analysis-container">
+            <div id="loadingMessage"></div>
+            <img id="analyzeIcon" src="analizi.png" alt="Analyzing">
+        </div>
 
-    <!-- QR Code Page -->
-    <div class="qr-page" id="qrPage">
-        <canvas id="qrCanvas"></canvas>
-        <button id="scanButton">Scan QR Code</button>
-        <div id="qrResult"></div>
+        <!-- True image result -->
+        <img id="trueImage" src="true.png" alt="True" />
+
+        <!-- Buttons - adjusted size and position -->
         <div id="buttons">
-            <button class="actionButton" id="redrawButton">Redraw</button>
-            <button class="actionButton" id="returnButton">Return to Home Page</button>
+            <button class="actionButton" id="reTakeButton" style="display:none;">Yeniden Çek</button>
+            <button class="actionButton" id="backToHomeButton" style="display:none;">Ana Sayfaya Dön</button>
         </div>
     </div>
 
     <script src="https://unpkg.com/jsqr/dist/jsQR.js"></script>
     <script>
-        // Show the QR code page after clicking start
-        document.getElementById('startButton').onclick = function() {
-            document.getElementById('mainPage').style.display = 'none';
-            document.getElementById('qrPage').style.display = 'flex';
-        };
-
-        // Set up the QR code scanning functionality
-        const canvas = document.getElementById('qrCanvas');
+        // DOM elements
+        const mainPage = document.getElementById('mainPage');
+        const photoPage = document.getElementById('photoPage');
+        const captureButton = document.getElementById('captureButton');
+        const analysisSection = document.getElementById('analysisSection');
+        const trueImage = document.getElementById('trueImage');
+        const reTakeButton = document.getElementById('reTakeButton');
+        const backToHomeButton = document.getElementById('backToHomeButton');
+        const canvas = document.getElementById('photoCanvas');
         const context = canvas.getContext('2d');
-        const qrResult = document.getElementById('qrResult');
-        const scanButton = document.getElementById('scanButton');
-
         let videoStream;
 
+        // Start button click handler
+        document.getElementById('startButton').onclick = function() {
+            mainPage.style.display = 'none';
+            photoPage.style.display = 'flex';
+            backToHomeButton.style.display = 'inline-block'; // Show home button only when leaving home page
+            startCamera();
+        };
+    
         function startCamera() {
             navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
                 .then((stream) => {
@@ -139,43 +212,55 @@
                     video.onloadedmetadata = () => {
                         canvas.width = video.videoWidth;
                         canvas.height = video.videoHeight;
-                        scanQRCode(video);
+                        captureImage(video);
                     };
                 })
                 .catch((err) => {
-                    console.error('Error accessing camera: ', err);
+                    console.error('Kamera hatası: ', err);
                 });
         }
 
-        function scanQRCode(video) {
+        // Capture image function
+        function captureImage(video) {
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-            const code = jsQR(imageData.data, canvas.width, canvas.height);
-            if (code) {
-                qrResult.textContent = 'QR Code Result: ' + code.data;
-                videoStream.getTracks().forEach(track => track.stop()); // Stop camera after reading QR code
-            } else {
-                requestAnimationFrame(() => scanQRCode(video)); // Continue scanning if no QR code detected
-            }
+            requestAnimationFrame(() => captureImage(video));
         }
 
-        // Start scanning when the Scan QR Code button is clicked
-        scanButton.onclick = function() {
+        // Capture button click handler
+        captureButton.onclick = function() {
+            photoPage.style.display = 'none';
+            analysisSection.style.display = 'flex';
+            
+            setTimeout(() => {
+                analysisSection.style.display = 'none';
+                trueImage.style.display = 'block';
+                reTakeButton.style.display = 'inline-block';
+            }, 5000);
+        };
+
+        // Retake button click handler
+        reTakeButton.onclick = function() {
+            trueImage.style.display = 'none';
+            reTakeButton.style.display = 'none';
+            photoPage.style.display = 'flex';
             startCamera();
         };
 
-        // Redraw button functionality (reset the QR code scan)
-        document.getElementById('redrawButton').onclick = function() {
-            qrResult.textContent = '';
-            startCamera();
-        };
-
-        // Return to the main page button functionality
-        document.getElementById('returnButton').onclick = function() {
-            document.getElementById('qrPage').style.display = 'none';
-            document.getElementById('mainPage').style.display = 'flex';
+        // Back to home button click handler
+        backToHomeButton.onclick = function() {
+            // Stop the video stream if it exists
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+            }
+            
+            // Reset the UI
+            photoPage.style.display = 'none';
+            trueImage.style.display = 'none';
+            reTakeButton.style.display = 'none';
+            backToHomeButton.style.display = 'none';
+            analysisSection.style.display = 'none';
+            mainPage.style.display = 'flex';
         };
     </script>
-
 </body>
 </html>
