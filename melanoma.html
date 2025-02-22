@@ -210,15 +210,17 @@
 
         /* Save button styles */
         #saveButton {
-            padding: 10px 15px;
-            font-size: 18px;
+            padding: 7px 11px;
+            font-size: 14px;
             background-color: #007bff;
             color: white;
             border: none;
-            border-radius: 20px;
+            border-radius:9px;
             cursor: pointer;
-            margin-top: 10px;
-            display: none;
+            position: absolute;
+            bottom: -50px;
+            
+            
         }
 
         #saveButton:hover {
@@ -407,30 +409,33 @@
 
         // Capture button click handler
         captureButton.onclick = function() {
-            // Increment counter when capture button is clicked
-            counter++;
-            
-            photoPage.style.display = 'none';
-            analysisSection.style.display = 'flex';
-            
-            setTimeout(() => {
-                analysisSection.style.display = 'none';
-                
-                // Check if counter is even or odd
-                if (counter % 2 === 0) {
-                    // Even - show false image
-                    falseImage.style.display = 'block';
-                    trueImage.style.display = 'none';
-                } else {
-                    // Odd - show true image
-                    trueImage.style.display = 'block';
-                    falseImage.style.display = 'none';
-                }
-                
-                reTakeButton.style.display = 'inline-block';
-                saveButton.style.display = 'inline-block';
-            }, 5000);
-        };
+    // Increase the counter
+    counter++;
+
+    // Hide the photo page and show the "analysis" animation
+    photoPage.style.display = 'none';
+    saveButton.style.display = 'none';
+    analysisSection.style.display = 'flex';
+
+    setTimeout(() => {
+        // Hide the analysis animation
+        analysisSection.style.display = 'none';
+
+        // Even/odd logic
+        if (counter % 2 === 0) {
+            falseImage.style.display = 'block';
+            trueImage.style.display = 'none';
+        } else {
+            trueImage.style.display = 'block';
+            falseImage.style.display = 'none';
+        }
+
+        // Show Retake and Save buttons
+        reTakeButton.style.display = 'inline-block';
+        saveButton.style.display = 'inline-block';
+    }, 5000);
+};
+
 
         // Save button click handler
         saveButton.onclick = function() {
@@ -447,7 +452,7 @@
             trueImage.style.display = 'none';
             falseImage.style.display = 'none';
             reTakeButton.style.display = 'none';
-            saveButton.style.display = 'none';
+            saveButton.style.display = 'inline-block';
             photoPage.style.display = 'flex';
             startCamera();
         };
