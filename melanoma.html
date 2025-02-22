@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="az">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -154,19 +154,131 @@
         .actionButton:hover {
             background-color: #28a745;
         }
+
+        /* Enhanced Language selector styles */
+        #languageSelector {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: #ffffff;
+            padding: 5px 10px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            font-size: 16px;
+            border: 1px solid #ddd;
+            transition: all 0.3s ease;
+            display: flex;
+            gap: 10px;
+        }
+
+        #languageSelector button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #languageSelector button:hover {
+            background-color: #0056b3;
+        }
+
+        #languageSelector button.active {
+            background-color: #0056b3;
+        }
+
+        /* History button styles */
+        #historyButton {
+            padding: 15px 20px;
+            font-size: 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s, transform 0.2s;
+            margin-top: 10px;
+        }
+
+        #historyButton:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        /* Save button styles */
+        #saveButton {
+            padding: 10px 15px;
+            font-size: 18px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 10px;
+            display: none;
+        }
+
+        #saveButton:hover {
+            background-color: #0056b3;
+        }
+
+        /* History container styles */
+        #historyContainer {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            width: 80%;
+            max-width: 400px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #historyList {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+        }
+
+        #historyList li {
+            background-color: #f1f1f1;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: left;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Language Selector -->
+        <div id="languageSelector">
+            <button id="enButton">EN</button>
+            <button id="azButton" class="active">AZ</button>
+        </div>
+
         <!-- Main Page -->
         <div id="mainPage">
             <button id="startButton">Başla</button>
+            <button id="historyButton">Tarixçə</button>
         </div>
 
         <!-- Photo Page -->
         <div class="photo-page" id="photoPage">
             <canvas id="photoCanvas"></canvas>
             <button id="captureButton">Çək</button>
+            <button id="saveButton">Yadda saxla</button>
         </div>
 
         <!-- Analysis Section - Redesigned to match image -->
@@ -186,6 +298,13 @@
             <button class="actionButton" id="reTakeButton" style="display:none;">Yenidən Çək</button>
             <button class="actionButton" id="backToHomeButton" style="display:none;">Ana Səhifə</button>
         </div>
+
+        <!-- History Container -->
+        <div id="historyContainer">
+            <h2>Tarixçə</h2>
+            <ul id="historyList"></ul>
+            <button class="actionButton" id="closeHistoryButton">Bağla</button>
+        </div>
     </div>
 
     <script src="https://unpkg.com/jsqr/dist/jsQR.js"></script>
@@ -194,11 +313,16 @@
         const mainPage = document.getElementById('mainPage');
         const photoPage = document.getElementById('photoPage');
         const captureButton = document.getElementById('captureButton');
+        const saveButton = document.getElementById('saveButton');
         const analysisSection = document.getElementById('analysisSection');
         const trueImage = document.getElementById('trueImage');
         const falseImage = document.getElementById('falseImage');
         const reTakeButton = document.getElementById('reTakeButton');
         const backToHomeButton = document.getElementById('backToHomeButton');
+        const historyButton = document.getElementById('historyButton');
+        const historyContainer = document.getElementById('historyContainer');
+        const historyList = document.getElementById('historyList');
+        const closeHistoryButton = document.getElementById('closeHistoryButton');
         const canvas = document.getElementById('photoCanvas');
         const context = canvas.getContext('2d');
         let videoStream;
@@ -212,6 +336,18 @@
             photoPage.style.display = 'flex';
             backToHomeButton.style.display = 'inline-block'; // Show home button only when leaving home page
             startCamera();
+        };
+
+        // History button click handler
+        historyButton.onclick = function() {
+            mainPage.style.display = 'none';
+            historyContainer.style.display = 'flex';
+        };
+
+        // Close history button click handler
+        closeHistoryButton.onclick = function() {
+            historyContainer.style.display = 'none';
+            mainPage.style.display = 'flex';
         };
     
         function startCamera() {
@@ -261,7 +397,18 @@
                 }
                 
                 reTakeButton.style.display = 'inline-block';
+                saveButton.style.display = 'inline-block';
             }, 5000);
+        };
+
+        // Save button click handler
+        saveButton.onclick = function() {
+            const result = counter % 2 === 0 ? 'Healthy' : 'Ill';
+            const timestamp = new Date().toLocaleString();
+            const listItem = document.createElement('li');
+            listItem.textContent = `${timestamp} - ${result}`;
+            historyList.appendChild(listItem);
+            saveButton.style.display = 'none';
         };
 
         // Retake button click handler
@@ -269,6 +416,7 @@
             trueImage.style.display = 'none';
             falseImage.style.display = 'none';
             reTakeButton.style.display = 'none';
+            saveButton.style.display = 'none';
             photoPage.style.display = 'flex';
             startCamera();
         };
@@ -285,6 +433,7 @@
             trueImage.style.display = 'none';
             falseImage.style.display = 'none';
             reTakeButton.style.display = 'none';
+            saveButton.style.display = 'none';
             backToHomeButton.style.display = 'none';
             analysisSection.style.display = 'none';
             mainPage.style.display = 'flex';
@@ -292,6 +441,47 @@
             // Reset counter when returning to home
             counter = 0;
         };
+
+        // Language selector
+        const enButton = document.getElementById('enButton');
+        const azButton = document.getElementById('azButton');
+
+        enButton.onclick = function() {
+            updateLanguage('en');
+            enButton.classList.add('active');
+            azButton.classList.remove('active');
+        };
+
+        azButton.onclick = function() {
+            updateLanguage('az');
+            azButton.classList.add('active');
+            enButton.classList.remove('active');
+        };
+
+        function updateLanguage(language) {
+            if (language === 'en') {
+                document.getElementById('startButton').textContent = 'Start';
+                document.getElementById('captureButton').textContent = 'Capture';
+                document.getElementById('reTakeButton').textContent = 'Retake';
+                document.getElementById('backToHomeButton').textContent = 'Home';
+                document.getElementById('historyButton').textContent = 'History';
+                document.getElementById('saveButton').textContent = 'Save';
+                document.getElementById('closeHistoryButton').textContent = 'Close';
+                document.querySelector('#historyContainer h2').textContent = 'History';
+            } else if (language === 'az') {
+                document.getElementById('startButton').textContent = 'Başla';
+                document.getElementById('captureButton').textContent = 'Çək';
+                document.getElementById('reTakeButton').textContent = 'Yenidən Çək';
+                document.getElementById('backToHomeButton').textContent = 'Ana Səhifə';
+                document.getElementById('historyButton').textContent = 'Tarixçə';
+                document.getElementById('saveButton').textContent = 'Yadda saxla';
+                document.getElementById('closeHistoryButton').textContent = 'Bağla';
+                document.querySelector('#historyContainer h2').textContent = 'Tarixçə';
+            }
+        }
+
+        // Set default language to Azerbaijani
+        updateLanguage('az');
     </script>
 </body>
 </html>
