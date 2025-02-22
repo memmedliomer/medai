@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MedAI</title>
     <style>
-        /* Main page */
         body {
             margin: 0;
             padding: 0;
@@ -52,7 +51,6 @@
             left: 20px;
         }
 
-        /* Photo page */
         .photo-page {
             display: none;
             width: 90%;
@@ -72,7 +70,6 @@
             border: 2px solid #ccc;
         }
 
-        /* Capture button */
         #captureButton {
             padding: 10px 15px;
             font-size: 18px;
@@ -90,7 +87,6 @@
             background-color: #28a745;
         }
 
-        /* Analysis display styles */
         .analysis-container {
             display: none;
             flex-direction: column;
@@ -113,14 +109,13 @@
             height: 150px;
         }
 
-        /* True image display */
         #trueImage {
             display: none;
             width: 300px;
             height: auto;
             margin: 20px 0;
         }
-        /* False image display */
+
         #falseImage {
             display: none;
             width: 300px;
@@ -128,7 +123,6 @@
             margin: 20px 0;
         }
 
-        /* Button container - adjusted position */
         #buttons {
             display: flex;
             flex-direction: column;
@@ -155,7 +149,6 @@
             background-color: #28a745;
         }
 
-        /* Enhanced Language selector styles */
         #languageSelector {
             position: absolute;
             top: 10px;
@@ -189,7 +182,6 @@
             background-color: #0056b3;
         }
 
-        /* History button styles */
         #historyButton {
             padding: 15px 20px;
             font-size: 20px;
@@ -208,26 +200,22 @@
             transform: scale(1.05);
         }
 
-        /* Save button styles */
         #saveButton {
-            padding: 7px 11px;
-            font-size: 14px;
+            padding: 8px 10px;
+            font-size: 15px;
             background-color: #007bff;
             color: white;
             border: none;
-            border-radius:9px;
+            border-radius: 10px;
             cursor: pointer;
             position: absolute;
-            bottom: -50px;
-            
-            
+            bottom: 110px;
         }
 
         #saveButton:hover {
             background-color: #0056b3;
         }
 
-        /* History container styles */
         #historyContainer {
             display: none;
             flex-direction: column;
@@ -261,7 +249,6 @@
             text-align: left;
         }
 
-        /* Start and History button styles */
         #startButton{
             padding: 15px 20px;
             font-size: 18px;
@@ -295,54 +282,37 @@
 </head>
 <body>
     <div class="container">
-        <!-- Language Selector -->
         <div id="languageSelector">
             <button id="enButton">EN</button>
             <button id="azButton" class="active">AZ</button>
         </div>
-
-        <!-- Main Page -->
         <div id="mainPage">
             <button id="startButton">Başla</button>
             <button id="historyButton">Tarixçə</button>
         </div>
-
-        <!-- Photo Page -->
         <div class="photo-page" id="photoPage">
             <canvas id="photoCanvas"></canvas>
             <button id="captureButton">Çək</button>
-            <button id="saveButton">Yadda saxla</button>
         </div>
-
-        <!-- Analysis Section - Redesigned to match image -->
         <div id="analysisSection" class="analysis-container">
             <div id="loadingMessage"></div>
             <img id="analyzeIcon" src="analizi.png" alt="Analyzing">
         </div>
-
-        <!-- True image result -->
         <img id="trueImage" src="true.png" alt="True" />
-        
-        <!-- False image result -->
         <img id="falseImage" src="false.png" alt="False" />
-
-        <!-- Buttons - adjusted size and position -->
         <div id="buttons">
+            <button class="actionButton" id="saveButton" style="display:none;">Yadda saxla</button>
             <button class="actionButton" id="reTakeButton" style="display:none;">Yenidən Çək</button>
             <button class="actionButton" id="backToHomeButton" style="display:none;">Ana Səhifə</button>
         </div>
-
-        <!-- History Container -->
         <div id="historyContainer">
             <h2>Tarixçə</h2>
             <ul id="historyList"></ul>
             <button class="actionButton" id="closeHistoryButton">Bağla</button>
         </div>
     </div>
-
     <script src="https://unpkg.com/jsqr/dist/jsQR.js"></script>
     <script>
-        // DOM elements
         const mainPage = document.getElementById('mainPage');
         const photoPage = document.getElementById('photoPage');
         const captureButton = document.getElementById('captureButton');
@@ -359,30 +329,26 @@
         const canvas = document.getElementById('photoCanvas');
         const context = canvas.getContext('2d');
         let videoStream;
-        
-        // Add counter variable
+
         let counter = 0;
 
-        // Start button click handler
         document.getElementById('startButton').onclick = function() {
             mainPage.style.display = 'none';
             photoPage.style.display = 'flex';
-            backToHomeButton.style.display = 'inline-block'; // Show home button only when leaving home page
+            backToHomeButton.style.display = 'inline-block';
             startCamera();
         };
 
-        // History button click handler
         historyButton.onclick = function() {
             mainPage.style.display = 'none';
             historyContainer.style.display = 'flex';
         };
 
-        // Close history button click handler
         closeHistoryButton.onclick = function() {
             historyContainer.style.display = 'none';
             mainPage.style.display = 'flex';
         };
-    
+
         function startCamera() {
             navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
                 .then((stream) => {
@@ -401,45 +367,31 @@
                 });
         }
 
-        // Capture image function
         function captureImage(video) {
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
             requestAnimationFrame(() => captureImage(video));
         }
 
-        // Capture button click handler
         captureButton.onclick = function() {
-    // Increase the counter
-    counter++;
+            counter++;
+            photoPage.style.display = 'none';
+            analysisSection.style.display = 'flex';
+            setTimeout(() => {
+                analysisSection.style.display = 'none';
+                if (counter % 2 === 0) {
+                    falseImage.style.display = 'block';
+                    trueImage.style.display = 'none';
+                } else {
+                    trueImage.style.display = 'block';
+                    falseImage.style.display = 'none';
+                }
+                reTakeButton.style.display = 'inline-block';
+                saveButton.style.display = 'inline-block';
+            }, 5000);
+        };
 
-    // Hide the photo page and show the "analysis" animation
-    photoPage.style.display = 'none';
-    saveButton.style.display = 'none';
-    analysisSection.style.display = 'flex';
-
-    setTimeout(() => {
-        // Hide the analysis animation
-        analysisSection.style.display = 'none';
-
-        // Even/odd logic
-        if (counter % 2 === 0) {
-            falseImage.style.display = 'block';
-            trueImage.style.display = 'none';
-        } else {
-            trueImage.style.display = 'block';
-            falseImage.style.display = 'none';
-        }
-
-        // Show Retake and Save buttons
-        reTakeButton.style.display = 'inline-block';
-        saveButton.style.display = 'inline-block';
-    }, 5000);
-};
-
-
-        // Save button click handler
         saveButton.onclick = function() {
-            const result = counter % 2 === 0 ? 'Healthy' : 'Ill';
+            const result = counter % 2 === 0 ? 'Sağlamsınız:' : 'Xəstəsiniz:';
             const timestamp = new Date().toLocaleString();
             const listItem = document.createElement('li');
             listItem.textContent = `${timestamp} - ${result}`;
@@ -447,24 +399,19 @@
             saveButton.style.display = 'none';
         };
 
-        // Retake button click handler
         reTakeButton.onclick = function() {
             trueImage.style.display = 'none';
             falseImage.style.display = 'none';
             reTakeButton.style.display = 'none';
-            saveButton.style.display = 'inline-block';
+            saveButton.style.display = 'none';
             photoPage.style.display = 'flex';
             startCamera();
         };
 
-        // Back to home button click handler
         backToHomeButton.onclick = function() {
-            // Stop the video stream if it exists
             if (videoStream) {
                 videoStream.getTracks().forEach(track => track.stop());
             }
-            
-            // Reset the UI
             photoPage.style.display = 'none';
             trueImage.style.display = 'none';
             falseImage.style.display = 'none';
@@ -473,12 +420,9 @@
             backToHomeButton.style.display = 'none';
             analysisSection.style.display = 'none';
             mainPage.style.display = 'flex';
-            
-            // Reset counter when returning to home
             counter = 0;
         };
 
-        // Language selector
         const enButton = document.getElementById('enButton');
         const azButton = document.getElementById('azButton');
 
@@ -516,7 +460,6 @@
             }
         }
 
-        // Set default language to Azerbaijani
         updateLanguage('az');
     </script>
 </body>
