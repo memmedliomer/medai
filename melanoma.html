@@ -39,12 +39,26 @@
             box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
             transition: background-color 0.3s, transform 0.2s;
         }
+        #telButton {
+            padding: 15px 20px;
+            font-size: 20px;
+            background-color: #c9ae13;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s, transform 0.2s;
+        }
 
         #startButton:hover {
             background-color: #218838;
             transform: scale(1.05);
         }
-
+        #telButton:hover {
+            background-color: #218838;
+            transform: scale(1.05);
+        }
         #logo {
             position: absolute;
             top: 20px;
@@ -289,6 +303,7 @@
         <div id="mainPage">
             <button id="startButton">Başla</button>
             <button id="historyButton">Tarixçə</button>
+            <button id="telButton">Təlimat</button>
         </div>
         <div class="photo-page" id="photoPage">
             <canvas id="photoCanvas"></canvas>
@@ -298,6 +313,13 @@
             <div id="loadingMessage"></div>
             <img id="analyzeIcon" src="analizi.png" alt="Analyzing">
         </div>
+        <div id="instructionsPage" style="display: none; width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; background-image: url('telimat.png'); background-size: cover;">
+    <!-- Home button to return to the main page -->
+    <button id="homeButton" style="position: absolute; top: 20px; left: 20px; padding: 10px 15px; font-size: 18px; background-color: #007bff; color: white; border: none; border-radius: 30px; cursor: pointer;">Home</button>
+    <!-- You can also add more instructions content here -->
+</div>
+
+        
         <img id="trueImage" src="true.png" alt="True" />
         <img id="falseImage" src="false.png" alt="False" />
         <div id="buttons">
@@ -338,7 +360,20 @@
             backToHomeButton.style.display = 'inline-block';
             startCamera();
         };
+        document.getElementById('telButton').onclick = function() {
+    // Hide main page content
+    mainPage.style.display = 'none';
+    // Display the instructions page
+    document.getElementById('instructionsPage').style.display = 'block';
+};
+document.getElementById('homeButton').onclick = function() {
+    // Hide the instructions page
+    document.getElementById('instructionsPage').style.display = 'none';
+    // Return to the main page
+    mainPage.style.display = 'flex';
+};
 
+        
         historyButton.onclick = function() {
             mainPage.style.display = 'none';
             historyContainer.style.display = 'flex';
@@ -447,6 +482,8 @@
                 document.getElementById('historyButton').textContent = 'History';
                 document.getElementById('saveButton').textContent = 'Save';
                 document.getElementById('closeHistoryButton').textContent = 'Close';
+                document.getElementById('telButton').textContent = 'Instruction';
+                document.getElementById('homeButton').textContent = 'Back';
                 document.querySelector('#historyContainer h2').textContent = 'History';
             } else if (language === 'az') {
                 document.getElementById('startButton').textContent = 'Başla';
@@ -455,7 +492,10 @@
                 document.getElementById('backToHomeButton').textContent = 'Ana Səhifə';
                 document.getElementById('historyButton').textContent = 'Tarixçə';
                 document.getElementById('saveButton').textContent = 'Yadda saxla';
-                document.getElementById('closeHistoryButton').textContent = 'Bağla';
+                document.getElementById('closeHistoryButton').textContent = 'Bağla'
+                document.getElementById('telButton').textContent = 'Təlimat';
+                document.getElementById('homeButton').textContent = 'Geri';
+                document.getElementById('instructionsPage').style.backgroundImage = "url('tel.png')";
                 document.querySelector('#historyContainer h2').textContent = 'Tarixçə';
             }
         }
